@@ -4,9 +4,10 @@
 >
 > Seamlessly orchestrates **Free Cloud Accelerator Runtimes (Kaggle & Google Colab GPU/TPU)** and **Multi-Key High-Speed API Pools (Groq LPUs & Cloudflare Workers AI)** with **Google Drive Remote Checkpointing** and **Isolated Subprocess AST Verification**.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg)](LICENSE)
 [![Python: 3.11+](https://img.shields.io/badge/Python-3.11%2B-brightgreen.svg)](https://www.python.org/)
 [![Hardware: GPU / TPU / API](https://img.shields.io/badge/Compute-Kaggle%20%7C%20Colab%20%7C%20Groq%20%7C%20Cloudflare-orange.svg)](SETUP.md)
+[![GitHub Stars](https://img.shields.io/github/stars/aashabhiras/DataSetCleaner?style=social)](https://github.com/aashabhiras/DataSetCleaner)
 
 ---
 
@@ -20,6 +21,7 @@
 * **Local-First & Non-Destructive:** Local Windows desktop GUI, CLI, and loopback MCP server for inspecting, deduplicating (MinHash/LSH), and auditing dataset quality without mutating source files.
 * **100% Privacy & Zero-PII:** Absolute file paths redacted from manifests, all secrets isolated in `.gitignore` via [`cred.example.json`](SETUP.md), and ZDR (Zero Data Retention) compatibility.
 
+> ⭐ **If you find this project useful, please consider giving it a star on GitHub—it helps support free open-source AI tooling!**  
 > 📖 **Looking to set up and run? Check out [SETUP.md](SETUP.md) for developer setup instructions and [ai.setup.md](ai.setup.md) for AI coding agent configuration.**
 
 ---
