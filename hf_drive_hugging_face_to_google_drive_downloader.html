@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HF → Drive | Hugging Face to Google Drive Downloader</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased selection:bg-amber-500/30 selection:text-amber-200">
+  <!-- Toast Container -->
+  <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+  <!-- Top Navigation -->
+  <header class="sticky top-0 z-30 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-slate-950 font-bold text-lg shrink-0 shadow-lg shadow-amber-500/20">
+          🤗
+        </div>
+        <div class="min-w-0">
+          <h1 class="text-sm sm:text-base font-bold tracking-tight text-white truncate">HF → Google Drive</h1>
+          <p class="text-xs text-slate-400 hidden sm:block truncate">Direct model &amp; dataset transfer workspace</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+        <!-- Status Pills -->
+        <div id="hfStatusPill" class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-900 border border-slate-800 text-slate-400">
+          <span class="w-2 h-2 rounded-full bg-slate-500"></span>
+          <span>HF: Offline</span>
+        </div>
+        <div id="driveStatusPill" class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-900 border border-slate-800 text-slate-400">
+          <span class="w-2 h-2 rounded-full bg-slate-500"></span>
+          <span>Drive: Offline</span>
+        </div>
+
+        <!-- Demo Mode Toggle -->
+        <button id="demoToggleBtn" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-300 transition">
+          <span id="demoDot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+          <span>Demo Mode</span>
+        </button>
+
+        <!-- Setup Guide Button -->
+        <button id="openGuideBtn" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span class="hidden sm:inline">Setup Guide</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <!-- Step 1: Authentication -->
+    <section aria-label="Authentication" class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <!-- Hugging Face Auth Card -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between gap-4 shadow-sm">
+        <div class="space-y-4">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold text-base">
+                HF
+              </div>
+              <div>
+                <h2 class="text-sm font-semibold text-white">1. Hugging Face Login</h2>
+                <p class="text-xs text-slate-400">Required for gated/private models &amp; datasets</p>
+              </div>
+            </div>
+            <span id="hfBadge" class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-400 border border-slate-700">Not Connected</span>
+          </div>
+
+          <div id="hfLoginForm" class="space-y-3">
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label for="hfTokenInput" class="text-xs font-medium text-slate-300">Access Token (Read)</label>
+                <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer" class="text-xs text-amber-400 hover:text-amber-300 underline underline-offset-2">Get HF Token ↗</a>
+              </div>
+              <div class="relative">
+                <input id="hfTokenInput" type="password" placeholder="hf_xxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off" class="w-full bg-slate-950 border border-slate-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-xl px-3.5 py-2.5 pr-16 text-xs font-mono text-slate-100 placeholder-slate-600 outline-none transition" />
+                <button id="toggleHfTokenBtn" type="button" class="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-xs text-slate-400 hover:text-slate-200 rounded">Show</button>
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button id="hfConnectBtn" type="button" class="flex-1 min-w-[140px] px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs transition shadow-md shadow-amber-500/10">
+                Verify &amp; Connect HF
+              </button>
+              <button id="hfGuestBtn" type="button" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs border border-slate-700 transition">
+                Public Guest
+              </button>
+            </div>
+          </div>
+
+          <div id="hfConnectedView" class="hidden bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <div id="hfAvatar" class="w-9 h-9 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-300 font-bold text-sm shrink-0">U</div>
+              <div class="min-w-0">
+                <p id="hfUsername" class="text-sm font-semibold text-white truncate">@username</p>
+                <p id="hfAccountType" class="text-xs text-slate-400 truncate">Authenticated via Access Token</p>
+              </div>
+            </div>
+            <button id="hfDisconnectBtn" type="button" class="px-3 py-1.5 rounded-lg text-xs font-medium text-rose-300 hover:bg-rose-500/10 border border-rose-500/20 transition shrink-0">
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Google Drive Auth Card -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between gap-4 shadow-sm">
+        <div class="space-y-4">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-lg bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M7.71 3.5L1.15 15l3.43 6 6.55-11.5L7.71 3.5zm8.58 0H9.42L16 15h6.86l-6.57-11.5zm-1.15 12.5H8.86L5.43 22h13.14l3.43-6h-6.86z"/></svg>
+              </div>
+              <div>
+                <h2 class="text-sm font-semibold text-white">2. Google Drive Login</h2>
+                <p class="text-xs text-slate-400">OAuth 2.0 direct upload to your Drive</p>
+              </div>
+            </div>
+            <span id="driveBadge" class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-400 border border-slate-700">Not Connected</span>
+          </div>
+
+          <div id="driveLoginForm" class="space-y-3">
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label for="googleClientIdInput" class="text-xs font-medium text-slate-300">Google OAuth Client ID</label>
+                <button id="guideLinkBtn" type="button" class="text-xs text-blue-400 hover:text-blue-300 underline underline-offset-2">How to get Client ID?</button>
+              </div>
+              <input id="googleClientIdInput" type="text" placeholder="123456789-abc.apps.googleusercontent.com" class="w-full bg-slate-950 border border-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-100 placeholder-slate-600 outline-none transition" />
+            </div>
+            <button id="driveConnectBtn" type="button" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition shadow-md shadow-blue-600/15">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10 5.35 0 9.25-3.67 9.25-9.09 0-1.15-.15-1.81-.15-1.81z"/></svg>
+              <span>Sign in with Google Drive</span>
+            </button>
+          </div>
+
+          <div id="driveConnectedView" class="hidden space-y-3">
+            <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-9 h-9 rounded-full bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-300 font-bold text-sm shrink-0">G</div>
+                <div class="min-w-0">
+                  <p id="driveUserEmail" class="text-sm font-semibold text-white truncate">Connected to Google Drive</p>
+                  <p class="text-xs text-emerald-400 truncate">Scope: drive.file (ready to upload)</p>
+                </div>
+              </div>
+              <button id="driveDisconnectBtn" type="button" class="px-3 py-1.5 rounded-lg text-xs font-medium text-rose-300 hover:bg-rose-500/10 border border-rose-500/20 transition shrink-0">
+                Disconnect
+              </button>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="flex-1 min-w-[180px]">
+                <label for="driveFolderSelect" class="sr-only">Target Drive Folder</label>
+                <select id="driveFolderSelect" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none focus:border-blue-500">
+                  <option value="root">📁 My Drive (Root)</option>
+                </select>
+              </div>
+              <button id="newFolderBtn" type="button" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 border border-slate-700 transition">
+                + New Folder
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Workspace Tabs -->
+    <section class="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+      <div class="border-b border-slate-800 px-4 sm:px-5 pt-3 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-1" role="tablist">
+          <button id="tabBrowser" type="button" role="tab" aria-selected="true" class="px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 border-amber-400 text-amber-300 transition">
+            Repository Explorer
+          </button>
+          <button id="tabQueue" type="button" role="tab" aria-selected="false" class="px-4 py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5">
+            <span>Transfer Queue</span>
+            <span id="queueCountBadge" class="px-1.5 py-0.5 rounded-full text-[10px] bg-slate-800 text-slate-300">0</span>
+          </button>
+          <button id="tabScript" type="button" role="tab" aria-selected="false" class="px-4 py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition">
+            Python / Colab Script
+          </button>
+        </div>
+
+        <div class="pb-2 flex items-center gap-2 text-xs text-slate-400">
+          <span id="selectedSummary">0 files selected (0 B)</span>
+        </div>
+      </div>
+
+      <!-- TAB 1: Repository Explorer -->
+      <div id="panelBrowser" class="p-4 sm:p-5 space-y-4">
+        <div class="flex flex-col md:flex-row gap-3">
+          <!-- Type Toggle -->
+          <div class="inline-flex rounded-xl bg-slate-950 p-1 border border-slate-800 shrink-0 self-start">
+            <button id="typeModelBtn" type="button" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 text-slate-950 transition">Model</button>
+            <button id="typeDatasetBtn" type="button" class="px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 transition">Dataset</button>
+          </div>
+
+          <!-- Repo Input / HF Locator -->
+          <div class="flex-1 flex flex-wrap sm:flex-nowrap gap-2">
+            <input id="repoIdInput" type="text" value="bert-base-uncased" placeholder="Paste HF locator(s): G4KMU/LEMUR, -G4KMU/LEMUR, URL, or search keyword..." class="flex-1 min-w-[200px] bg-slate-950 border border-slate-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-mono text-slate-100 placeholder-slate-600 outline-none transition" />
+            <button id="searchHfBtn" type="button" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs sm:text-sm border border-slate-700 transition shrink-0">
+              Search HF
+            </button>
+            <button id="loadRepoBtn" type="button" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs sm:text-sm transition shrink-0">
+              Load Files
+            </button>
+          </div>
+        </div>
+
+        <!-- Parsed Locator Chips (for comma/multi-locator inputs) -->
+        <div id="locatorChipsWrap" class="hidden flex-wrap items-center gap-2 text-xs">
+          <span class="text-slate-400 font-medium">Parsed locators:</span>
+          <div id="locatorChipsList" class="flex flex-wrap items-center gap-1.5"></div>
+        </div>
+
+        <!-- HF Search Results -->
+        <div id="hfSearchResultsWrap" class="hidden border border-slate-800 rounded-xl bg-slate-950/80 p-3 space-y-2">
+          <div class="flex items-center justify-between">
+            <span id="hfSearchResultsTitle" class="text-xs font-semibold text-amber-300">Hugging Face Search Results</span>
+            <button id="closeSearchResultsBtn" type="button" class="text-xs text-slate-400 hover:text-white">Close</button>
+          </div>
+          <div id="hfSearchResultsList" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto"></div>
+        </div>
+
+        <!-- Quick Presets -->
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <span class="text-slate-500">Quick try:</span>
+          <button type="button" data-repo="G4KMU/LEMUR" data-type="model" class="preset-btn px-2.5 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 font-mono transition">G4KMU/LEMUR</button>
+          <button type="button" data-repo="bert-base-uncased" data-type="model" class="preset-btn px-2.5 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 font-mono transition">bert-base-uncased</button>
+          <button type="button" data-repo="Qwen/Qwen2.5-0.5B-Instruct" data-type="model" class="preset-btn px-2.5 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 font-mono transition">Qwen/Qwen2.5-0.5B-Instruct</button>
+          <button type="button" data-repo="imdb" data-type="dataset" class="preset-btn px-2.5 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 font-mono transition">imdb (dataset)</button>
+          <button type="button" data-repo="fka/awesome-chatgpt-prompts" data-type="dataset" class="preset-btn px-2.5 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 font-mono transition">awesome-chatgpt-prompts</button>
+        </div>
+
+        <!-- Repo Metadata & Filter Toolbar -->
+        <div id="repoToolbar" class="hidden flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-slate-800/80">
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="repoMetaTitle" class="text-sm font-semibold text-white font-mono"></span>
+            <span id="repoMetaStats" class="text-xs text-slate-400"></span>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <input id="fileFilterInput" type="text" placeholder="Filter files..." class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder-slate-500 outline-none focus:border-amber-500 w-40 sm:w-48" />
+            <button id="selectAllBtn" type="button" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 transition">Select All</button>
+            <button id="selectSmallBtn" type="button" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 transition">≤ 100 MB</button>
+            <button id="clearSelectionBtn" type="button" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-400 hover:text-slate-200 transition">Clear</button>
+          </div>
+        </div>
+
+        <!-- File List -->
+        <div id="fileListContainer" class="border border-slate-800 rounded-xl bg-slate-950/60 overflow-hidden">
+          <div id="fileListEmpty" class="p-8 text-center space-y-2">
+            <p class="text-sm text-slate-300 font-medium">Enter a Hugging Face repository ID and click "Load Files"</p>
+            <p class="text-xs text-slate-500">Supports public repos in Guest mode and private/gated repos with your HF token.</p>
+          </div>
+          <div id="fileListTableWrap" class="hidden max-h-80 overflow-y-auto divide-y divide-slate-800/70"></div>
+        </div>
+
+        <!-- Action Footer -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
+          <p class="text-xs text-slate-400">
+            Tip: For multi-GB LFS weights, use the <button id="jumpToScriptBtn" type="button" class="text-amber-400 hover:underline">Python / Colab Script</button> tab to avoid browser memory limits.
+          </p>
+          <button id="startDownloadBtn" type="button" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-semibold text-xs sm:text-sm transition shadow-lg shadow-emerald-500/15">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+            <span>Download Selected to Drive</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB 2: Transfer Queue -->
+      <div id="panelQueue" class="hidden p-4 sm:p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 class="text-sm font-semibold text-white">Active &amp; Completed Transfers</h3>
+            <p id="queueOverallText" class="text-xs text-slate-400">No transfers started yet.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="cancelQueueBtn" type="button" class="hidden px-3 py-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-medium transition">
+              Cancel Remaining
+            </button>
+            <button id="clearCompletedBtn" type="button" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition">
+              Clear Completed
+            </button>
+          </div>
+        </div>
+
+        <div id="queueList" class="space-y-2.5">
+          <div class="p-8 text-center border border-slate-800 rounded-xl bg-slate-950/50 text-xs text-slate-500">
+            Select files in the Repository Explorer and click "Download Selected to Drive" to start.
+          </div>
+        </div>
+
+        <!-- Activity Log -->
+        <div class="border border-slate-800 rounded-xl bg-slate-950 p-3.5 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-300">Transfer Log</span>
+            <button id="clearLogBtn" type="button" class="text-[11px] text-slate-500 hover:text-slate-300">Clear</button>
+          </div>
+          <pre id="activityLog" class="text-[11px] font-mono text-slate-400 max-h-36 overflow-y-auto whitespace-pre-wrap leading-relaxed">Ready.</pre>
+        </div>
+      </div>
+
+      <!-- TAB 3: Python / Colab Script -->
+      <div id="panelScript" class="hidden p-4 sm:p-5 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 class="text-sm font-semibold text-white">Auto-Generated Python / Google Colab Script</h3>
+            <p class="text-xs text-slate-400">Best for large multi-GB models &amp; datasets—streams directly from Hugging Face into mounted Google Drive without browser limits.</p>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button id="copyScriptBtn" type="button" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition">
+              Copy Script
+            </button>
+            <button id="downloadScriptBtn" type="button" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-semibold transition">
+              Download .py
+            </button>
+          </div>
+        </div>
+
+        <pre id="pythonScriptPreview" class="bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-mono text-emerald-300 overflow-x-auto max-h-96 leading-relaxed"></pre>
+      </div>
+    </section>
+  </main>
+
+  <!-- Create Folder Modal -->
+  <div id="folderModal" class="hidden fixed inset-0 z-40 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 class="text-sm font-semibold text-white">Create Google Drive Folder</h3>
+        <button id="closeFolderModalBtn" type="button" class="text-slate-400 hover:text-white text-lg leading-none">&times;</button>
+      </div>
+      <div>
+        <label for="newFolderNameInput" class="block text-xs font-medium text-slate-300 mb-1.5">Folder Name</label>
+        <input id="newFolderNameInput" type="text" value="HuggingFace-Downloads" class="w-full bg-slate-950 border border-slate-700 focus:border-blue-500 rounded-xl px-3.5 py-2.5 text-sm text-white outline-none" />
+      </div>
+      <div class="flex justify-end gap-2">
+        <button id="cancelFolderModalBtn" type="button" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300">Cancel</button>
+        <button id="confirmCreateFolderBtn" type="button" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white">Create Folder</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Setup Guide Modal -->
+  <div id="guideModal" class="hidden fixed inset-0 z-40 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full p-5 sm:p-6 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-white">Quick Setup Guide</h3>
+        <button id="closeGuideModalBtn" type="button" class="text-slate-400 hover:text-white text-xl leading-none">&times;</button>
+      </div>
+      <div class="space-y-3 text-xs sm:text-sm text-slate-300 leading-relaxed">
+        <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5">
+          <p class="font-semibold text-amber-400">1. Hugging Face Access Token</p>
+          <p class="text-xs text-slate-400">Go to <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer" class="text-amber-300 underline">huggingface.co/settings/tokens</a>, create a <strong>Read</strong> token (starts with <code class="font-mono text-slate-200">hf_</code>), and paste it into the Hugging Face Login card. Public repos also work via <strong>Public Guest</strong>.</p>
+        </div>
+        <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5">
+          <p class="font-semibold text-blue-400">2. Google Drive OAuth Client ID</p>
+          <ol class="list-decimal list-inside text-xs text-slate-400 space-y-1">
+            <li>Open <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer" class="text-blue-300 underline">Google Cloud Console → Credentials</a> and enable the <strong>Google Drive API</strong>.</li>
+            <li>Create an <strong>OAuth 2.0 Client ID</strong> (Application type: <strong>Web application</strong>).</li>
+            <li>Add your current browser origin to <strong>Authorized JavaScript origins</strong>, then paste the Client ID into the Google Drive card.</li>
+          </ol>
+        </div>
+        <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5">
+          <p class="font-semibold text-emerald-400">3. Demo Mode &amp; Large Models</p>
+          <p class="text-xs text-slate-400">Toggle <strong>Demo Mode</strong> in the header to test the full login, browsing, and upload queue flow without credentials. For multi-GB weights, switch to the <strong>Python / Colab Script</strong> tab to generate a ready-to-run script.</p>
+        </div>
+      </div>
+      <div class="flex justify-end">
+        <button id="doneGuideBtn" type="button" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      demoMode: false,
+      hf: { connected: false, guest: false, token: '', username: '', type: '' },
+      drive: { connected: false, clientId: '', accessToken: '', folders: [{ id: 'root', name: 'My Drive (Root)' }], selectedFolderId: 'root' },
+      repo: { type: 'model', id: 'bert-base-uncased', files: [], filter: '', selected: new Set() },
+      queue: [],
+      isTransferring: false,
+      cancelRequested: false,
+      activeTab: 'browser'
+    };
+
+    const el = (id) => document.getElementById(id);
+
+    function safeGetStorage(key) {
+      try { return localStorage.getItem(key) || ''; } catch (_) { return ''; }
+    }
+    function safeSetStorage(key, val) {
+      try { localStorage.setItem(key, val); } catch (_) {}
+    }
+
+    function formatBytes(bytes) {
+      if (!bytes || bytes <= 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return (bytes / Math.pow(k, i)).toFixed(i === 0 ? 0 : 2) + ' ' + sizes[i];
+    }
+
+    function logMsg(msg) {
+      const log = el('activityLog');
+      const ts = new Date().toLocaleTimeString();
+      log.textContent = (log.textContent === 'Ready.' ? '' : log.textContent + '\n') + `[${ts}] ${msg}`;
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function showToast(message, type = 'info') {
+      const colors = {
+        info: 'bg-slate-900 border-slate-700 text-slate-100',
+        success: 'bg-emerald-950/95 border-emerald-500/40 text-emerald-200',
+        error: 'bg-rose-950/95 border-rose-500/40 text-rose-200',
+        warn: 'bg-amber-950/95 border-amber-500/40 text-amber-200'
+      };
+      const toast = document.createElement('div');
+      toast.className = `pointer-events-auto border rounded-xl px-4 py-3 text-xs font-medium shadow-xl transition-all ${colors[type] || colors.info}`;
+      toast.textContent = message;
+      el('toastContainer').appendChild(toast);
+      setTimeout(() => {
+        toast.classList.add('opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, 3400);
+    }
+
+    function updateStatusUI() {
+      // HF UI
+      const hfPill = el('hfStatusPill');
+      const hfBadge = el('hfBadge');
+      if (state.hf.connected) {
+        hfPill.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span><span>HF: ${state.hf.username}</span>`;
+        hfPill.className = 'hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/10 border border-amber-500/30 text-amber-300';
+        hfBadge.textContent = state.hf.guest ? 'Guest' : 'Connected';
+        hfBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/15 text-amber-300 border border-amber-500/30';
+        el('hfLoginForm').classList.add('hidden');
+        el('hfConnectedView').classList.remove('hidden');
+        el('hfUsername').textContent = state.hf.username;
+        el('hfAvatar').textContent = state.hf.username.replace('@', '').charAt(0).toUpperCase() || 'H';
+        el('hfAccountType').textContent = state.hf.guest ? 'Public repository access only' : 'Authenticated via Access Token';
+      } else {
+        hfPill.innerHTML = `<span class="w-2 h-2 rounded-full bg-slate-500"></span><span>HF: Offline</span>`;
+        hfPill.className = 'hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-900 border border-slate-800 text-slate-400';
+        hfBadge.textContent = 'Not Connected';
+        hfBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-400 border border-slate-700';
+        el('hfLoginForm').classList.remove('hidden');
+        el('hfConnectedView').classList.add('hidden');
+      }
+
+      // Drive UI
+      const drivePill = el('driveStatusPill');
+      const driveBadge = el('driveBadge');
+      if (state.drive.connected) {
+        drivePill.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span>Drive: Connected</span>`;
+        drivePill.className = 'hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 border border-emerald-500/30 text-emerald-300';
+        driveBadge.textContent = 'Connected';
+        driveBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/15 text-emerald-300 border border-emerald-500/30';
+        el('driveLoginForm').classList.add('hidden');
+        el('driveConnectedView').classList.remove('hidden');
+        el('driveUserEmail').textContent = state.demoMode ? 'demo.user@gmail.com (Demo)' : 'Google Drive OAuth Active';
+      } else {
+        drivePill.innerHTML = `<span class="w-2 h-2 rounded-full bg-slate-500"></span><span>Drive: Offline</span>`;
+        drivePill.className = 'hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-900 border border-slate-800 text-slate-400';
+        driveBadge.textContent = 'Not Connected';
+        driveBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-400 border border-slate-700';
+        el('driveLoginForm').classList.remove('hidden');
+        el('driveConnectedView').classList.add('hidden');
+      }
+
+      // Demo button
+      el('demoDot').className = state.demoMode ? 'w-2 h-2 rounded-full bg-emerald-400' : 'w-2 h-2 rounded-full bg-slate-500';
+      el('demoToggleBtn').className = state.demoMode
+        ? 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-emerald-500/40 bg-emerald-500/15 text-emerald-300 transition'
+        : 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-300 transition';
+
+      renderFolderOptions();
+      updateSelectedSummary();
+      updatePythonScript();
+    }
+
+    function renderFolderOptions() {
+      const sel = el('driveFolderSelect');
+      sel.innerHTML = state.drive.folders.map(f => `<option value="${f.id}">📁 ${f.name}</option>`).join('');
+      sel.value = state.drive.selectedFolderId;
+    }
+
+    function updateSelectedSummary() {
+      const selectedFiles = state.repo.files.filter(f => state.repo.selected.has(f.rfilename));
+      const totalBytes = selectedFiles.reduce((acc, f) => acc + (f.size || 0), 0);
+      el('selectedSummary').textContent = `${selectedFiles.length} file${selectedFiles.length === 1 ? '' : 's'} selected (${formatBytes(totalBytes)})`;
+      el('startDownloadBtn').disabled = selectedFiles.length === 0 || state.isTransferring;
+    }
+
+    function switchTab(tab) {
+      state.activeTab = tab;
+      const tabs = { browser: ['tabBrowser', 'panelBrowser'], queue: ['tabQueue', 'panelQueue'], script: ['tabScript', 'panelScript'] };
+      Object.entries(tabs).forEach(([key, [btnId, panelId]]) => {
+        const active = key === tab;
+        el(panelId).classList.toggle('hidden', !active);
+        el(btnId).className = active
+          ? 'px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 border-amber-400 text-amber-300 transition flex items-center gap-1.5'
+          : 'px-4 py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5';
+        el(btnId).setAttribute('aria-selected', String(active));
+      });
+      if (tab === 'script') updatePythonScript();
+    }
+
+    // HF Auth
+    async function connectHF() {
+      const token = el('hfTokenInput').value.trim();
+      if (state.demoMode) {
+        state.hf = { connected: true, guest: false, token: token || 'hf_demo_token', username: '@ml-researcher', type: 'user' };
+        showToast('Connected to Hugging Face (Demo Mode)', 'success');
+        logMsg('HF Demo login succeeded as @ml-researcher');
+        updateStatusUI();
+        return;
+      }
+      if (!token) {
+        showToast('Enter a Hugging Face token or choose Public Guest.', 'warn');
+        return;
+      }
+      el('hfConnectBtn').disabled = true;
+      el('hfConnectBtn').textContent = 'Verifying...';
+      try {
+        const res = await fetch('https://huggingface.co/api/whoami-v2', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        state.hf = { connected: true, guest: false, token, username: '@' + (data.name || 'user'), type: data.type || 'user' };
+        showToast(`Signed in to HF as ${state.hf.username}`, 'success');
+        logMsg(`HF authenticated as ${state.hf.username}`);
+      } catch (err) {
+        showToast(`HF verification failed: ${err.message}`, 'error');
+        logMsg(`HF auth error: ${err.message}`);
+      } finally {
+        el('hfConnectBtn').disabled = false;
+        el('hfConnectBtn').textContent = 'Verify & Connect HF';
+        updateStatusUI();
+      }
+    }
+
+    function connectHFGuest() {
+      state.hf = { connected: true, guest: true, token: '', username: 'Public Guest', type: 'guest' };
+      showToast('Using Hugging Face Public Guest mode', 'info');
+      logMsg('HF connected in Public Guest mode');
+      updateStatusUI();
+    }
+
+    // Google Drive Auth
+    async function connectDrive() {
+      if (state.demoMode) {
+        state.drive.connected = true;
+        state.drive.accessToken = 'demo_drive_token';
+        state.drive.folders = [
+          { id: 'root', name: 'My Drive (Root)' },
+          { id: 'demo_models', name: 'AI Models' },
+          { id: 'demo_datasets', name: 'HF Datasets' }
+        ];
+        showToast('Signed in to Google Drive (Demo Mode)', 'success');
+        logMsg('Google Drive Demo OAuth connected');
+        updateStatusUI();
+        return;
+      }
+
+      const clientId = el('googleClientIdInput').value.trim();
+      if (!clientId) {
+        showToast('Please enter your Google OAuth Client ID first.', 'warn');
+        return;
+      }
+      safeSetStorage('hf_drive_client_id', clientId);
+      state.drive.clientId = clientId;
+
+      if (!window.google || !window.google.accounts || !window.google.accounts.oauth2) {
+        showToast('Google Identity Services script not loaded yet. Check connection or use Demo Mode.', 'error');
+        return;
+      }
+
+      try {
+        const tokenClient = window.google.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope: 'https://www.googleapis.com/auth/drive.file',
+          callback: async (resp) => {
+            if (resp.error) {
+              showToast(`Google OAuth error: ${resp.error}`, 'error');
+              logMsg(`Drive OAuth error: ${resp.error}`);
+              return;
+            }
+            state.drive.connected = true;
+            state.drive.accessToken = resp.access_token;
+            showToast('Google Drive connected!', 'success');
+            logMsg('Google Drive OAuth token acquired');
+            await loadDriveFolders();
+            updateStatusUI();
+          }
+        });
+        tokenClient.requestAccessToken({ prompt: 'consent' });
+      } catch (err) {
+        showToast(`Failed to start Google sign-in: ${err.message}`, 'error');
+      }
+    }
+
+    async function loadDriveFolders() {
+      if (state.demoMode || !state.drive.accessToken) return;
+      try {
+        const q = encodeURIComponent("mimeType='application/vnd.google-apps.folder' and trashed=false");
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)&pageSize=50`, {
+          headers: { Authorization: `Bearer ${state.drive.accessToken}` }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        state.drive.folders = [{ id: 'root', name: 'My Drive (Root)' }, ...(data.files || [])];
+        renderFolderOptions();
+      } catch (_) {}
+    }
+
+    async function createDriveFolder() {
+      const name = el('newFolderNameInput').value.trim();
+      if (!name) return;
+      if (state.demoMode) {
+        const id = 'demo_' + Date.now();
+        state.drive.folders.push({ id, name });
+        state.drive.selectedFolderId = id;
+        el('folderModal').classList.add('hidden');
+        renderFolderOptions();
+        showToast(`Created folder "${name}" (Demo)`, 'success');
+        return;
+      }
+      try {
+        const res = await fetch('https://www.googleapis.com/drive/v3/files', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${state.drive.accessToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ name, mimeType: 'application/vnd.google-apps.folder' })
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const folder = await res.json();
+        state.drive.folders.push({ id: folder.id, name: folder.name });
+        state.drive.selectedFolderId = folder.id;
+        el('folderModal').classList.add('hidden');
+        renderFolderOptions();
+        showToast(`Created folder "${folder.name}"`, 'success');
+        logMsg(`Created Drive folder: ${folder.name} (${folder.id})`);
+      } catch (err) {
+        showToast(`Could not create folder: ${err.message}`, 'error');
+      }
+    }
+
+    // Parse HF Locators (e.g. "-G4KMU/LEMUR,G4KMU/LEMUR", URLs, hf://, @rev, :tag)
+    function parseHFLocators(raw) {
+      const tokens = String(raw || '')
+        .split(/[\n,;]+/)
+        .map(t => t.trim())
+        .filter(Boolean);
+      const seen = new Set();
+      const parsed = [];
+      for (let token of tokens) {
+        token = token.replace(/^[-*•]+\s*/, '').trim();
+        let detectedType = null;
+        token = token.replace(/^https?:\/\/(?:www\.)?huggingface\.co\//i, '');
+        token = token.replace(/^hf:\/\//i, '');
+        if (/^datasets\//i.test(token)) {
+          detectedType = 'dataset';
+          token = token.replace(/^datasets\//i, '');
+        } else if (/^models\//i.test(token)) {
+          detectedType = 'model';
+          token = token.replace(/^models\//i, '');
+        }
+        token = token.replace(/\/(tree|blob|resolve)\/[^/]+.*$/i, '');
+        let revision = 'main';
+        if (token.includes('@')) {
+          const parts = token.split('@');
+          token = parts[0];
+          revision = parts[1] || 'main';
+        }
+        if (token.includes(':')) {
+          token = token.split(':')[0];
+        }
+        token = token.replace(/^\/+|\/+$/g, '');
+        if (!token) continue;
+        const key = `${detectedType || state.repo.type}:${token}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          parsed.push({ id: token, type: detectedType, revision });
+        }
+      }
+      return parsed;
+    }
+
+    function renderLocatorChips(locators, activeId) {
+      const wrap = el('locatorChipsWrap');
+      const list = el('locatorChipsList');
+      if (!locators || locators.length <= 1) {
+        wrap.classList.add('hidden');
+        wrap.classList.remove('flex');
+        list.innerHTML = '';
+        return;
+      }
+      wrap.classList.remove('hidden');
+      wrap.classList.add('flex');
+      list.innerHTML = locators.map(loc => {
+        const isActive = loc.id === activeId;
+        return `<button type="button" data-loc-id="${loc.id}" data-loc-type="${loc.type || ''}" class="locator-chip px-2.5 py-1 rounded-lg font-mono text-xs border transition ${isActive ? 'bg-amber-500/20 border-amber-400 text-amber-200 font-semibold' : 'bg-slate-950 border-slate-700 text-slate-300 hover:bg-slate-800'}">${loc.id}</button>`;
+      }).join('');
+    }
+
+    async function searchHFRepos() {
+      const raw = el('repoIdInput').value.trim();
+      const locators = parseHFLocators(raw);
+      const query = locators.length ? locators[0].id : raw;
+      if (!query) {
+        showToast('Enter a model or dataset name/locator to search.', 'warn');
+        return;
+      }
+      el('searchHfBtn').disabled = true;
+      el('searchHfBtn').textContent = 'Searching...';
+
+      if (state.demoMode) {
+        const demoPool = [
+          { id: 'G4KMU/LEMUR', downloads: 18420, likes: 312, tag: 'text-generation', type: 'model' },
+          { id: 'Qwen/Qwen2.5-0.5B-Instruct', downloads: 942100, likes: 1240, tag: 'text-generation', type: 'model' },
+          { id: 'bert-base-uncased', downloads: 45120000, likes: 1890, tag: 'fill-mask', type: 'model' },
+          { id: 'fka/awesome-chatgpt-prompts', downloads: 125000, likes: 5400, tag: 'dataset', type: 'dataset' }
+        ];
+        const qLower = query.toLowerCase();
+        const matches = demoPool.filter(m => m.id.toLowerCase().includes(qLower) || qLower.split('/').some(p => p && m.id.toLowerCase().includes(p)));
+        renderSearchResults(matches.length ? matches : demoPool, query);
+        el('searchHfBtn').disabled = false;
+        el('searchHfBtn').textContent = 'Search HF';
+        return;
+      }
+
+      try {
+        const apiKind = state.repo.type === 'dataset' ? 'datasets' : 'models';
+        const headers = state.hf.token ? { Authorization: `Bearer ${state.hf.token}` } : {};
+        const res = await fetch(`https://huggingface.co/api/${apiKind}?search=${encodeURIComponent(query)}&limit=8`, { headers });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const items = (Array.isArray(data) ? data : []).map(item => ({
+          id: item.id,
+          downloads: item.downloads || 0,
+          likes: item.likes || 0,
+          tag: item.pipeline_tag || state.repo.type,
+          type: state.repo.type
+        }));
+        renderSearchResults(items, query);
+      } catch (err) {
+        showToast(`HF search failed: ${err.message}`, 'error');
+        logMsg(`HF search error: ${err.message}`);
+      } finally {
+        el('searchHfBtn').disabled = false;
+        el('searchHfBtn').textContent = 'Search HF';
+      }
+    }
+
+    function renderSearchResults(items, query) {
+      const wrap = el('hfSearchResultsWrap');
+      const list = el('hfSearchResultsList');
+      el('hfSearchResultsTitle').textContent = `Hugging Face ${state.repo.type}s matching "${query}" (${items.length})`;
+      wrap.classList.remove('hidden');
+      if (!items.length) {
+        list.innerHTML = `<p class="text-xs text-slate-400 col-span-2 py-2">No matching repositories found for "${query}".</p>`;
+        return;
+      }
+      list.innerHTML = items.map(item => `
+        <button type="button" data-result-id="${item.id}" data-result-type="${item.type}" class="search-result-btn text-left p-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/50 transition space-y-1">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-mono font-semibold text-amber-300 truncate">${item.id}</span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 shrink-0">${item.tag}</span>
+          </div>
+          <p class="text-[11px] text-slate-400">⬇ ${item.downloads.toLocaleString()} • ♥ ${item.likes.toLocaleString()}</p>
+        </button>
+      `).join('');
+    }
+
+    // Load HF Repo Files
+    async function loadRepoFiles(overrideId = null) {
+      const rawInput = overrideId !== null ? overrideId : el('repoIdInput').value.trim();
+      const locators = parseHFLocators(rawInput);
+      if (!locators.length) {
+        showToast('Enter a repository ID or locator (e.g. G4KMU/LEMUR).', 'warn');
+        return;
+      }
+      const primary = locators[0];
+      if (primary.type === 'dataset') el('typeDatasetBtn').click();
+      else if (primary.type === 'model') el('typeModelBtn').click();
+      const repoId = primary.id;
+      if (overrideId === null) {
+        renderLocatorChips(locators, repoId);
+      }
+      state.repo.id = repoId;
+      state.repo.selected.clear();
+      el('loadRepoBtn').disabled = true;
+      el('loadRepoBtn').textContent = 'Loading...';
+
+      if (state.demoMode) {
+        const sampleFiles = state.repo.type === 'model'
+          ? [
+              { rfilename: 'config.json', size: 654, lfs: false },
+              { rfilename: 'tokenizer.json', size: 711396, lfs: false },
+              { rfilename: 'tokenizer_config.json', size: 1280, lfs: false },
+              { rfilename: 'README.md', size: 9420, lfs: false },
+              { rfilename: 'model.safetensors', size: 440449768, lfs: true }
+            ]
+          : [
+              { rfilename: 'README.md', size: 4820, lfs: false },
+              { rfilename: 'dataset_infos.json', size: 2150, lfs: false },
+              { rfilename: 'data/train-00000-of-00001.parquet', size: 21045120, lfs: true },
+              { rfilename: 'data/test-00000-of-00001.parquet', size: 19840120, lfs: true }
+            ];
+        state.repo.files = sampleFiles;
+        el('repoMetaTitle').textContent = repoId;
+        el('repoMetaStats').textContent = `• ${sampleFiles.length} files (Demo)`;
+        renderFileList();
+        el('loadRepoBtn').disabled = false;
+        el('loadRepoBtn').textContent = 'Load Files';
+        updatePythonScript();
+        return;
+      }
+
+      try {
+        const endpoint = state.repo.type === 'dataset'
+          ? `https://huggingface.co/api/datasets/${repoId}?blobs=true`
+          : `https://huggingface.co/api/models/${repoId}?blobs=true`;
+        const headers = state.hf.token ? { Authorization: `Bearer ${state.hf.token}` } : {};
+        const res = await fetch(endpoint, { headers });
+        if (!res.ok) throw new Error(`HTTP ${res.status} (${res.status === 401 || res.status === 403 ? 'Auth required or gated repo' : 'Repo not found'})`);
+        const data = await res.json();
+        const siblings = (data.siblings || []).map(s => ({
+          rfilename: s.rfilename,
+          size: s.size || (s.lfs && s.lfs.size) || 0,
+          lfs: Boolean(s.lfs)
+        }));
+        state.repo.files = siblings;
+        el('repoMetaTitle').textContent = data.id || repoId;
+        const total = siblings.reduce((a, b) => a + (b.size || 0), 0);
+        el('repoMetaStats').textContent = `• ${siblings.length} files (${formatBytes(total)})`;
+        logMsg(`Loaded ${siblings.length} files from ${state.repo.type} "${repoId}"`);
+        renderFileList();
+      } catch (err) {
+        showToast(`Failed to load repo: ${err.message}`, 'error');
+        logMsg(`Repo load error: ${err.message}`);
+      } finally {
+        el('loadRepoBtn').disabled = false;
+        el('loadRepoBtn').textContent = 'Load Files';
+        updateSelectedSummary();
+        updatePythonScript();
+      }
+    }
+
+    function renderFileList() {
+      const files = state.repo.files.filter(f => !state.repo.filter || f.rfilename.toLowerCase().includes(state.repo.filter.toLowerCase()));
+      if (state.repo.files.length === 0) {
+        el('repoToolbar').classList.add('hidden');
+        el('fileListEmpty').classList.remove('hidden');
+        el('fileListTableWrap').classList.add('hidden');
+        return;
+      }
+      el('repoToolbar').classList.remove('hidden');
+      el('repoToolbar').classList.add('flex');
+      el('fileListEmpty').classList.add('hidden');
+      el('fileListTableWrap').classList.remove('hidden');
+
+      el('fileListTableWrap').innerHTML = files.map(f => {
+        const checked = state.repo.selected.has(f.rfilename) ? 'checked' : '';
+        const lfsTag = f.lfs ? '<span class="px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-300 border border-purple-500/30 text-[10px] font-medium">LFS</span>' : '';
+        return `
+          <label class="flex items-center justify-between gap-3 px-4 py-2.5 hover:bg-slate-900/90 cursor-pointer transition">
+            <div class="flex items-center gap-3 min-w-0">
+              <input type="checkbox" data-file="${f.rfilename}" class="file-checkbox w-4 h-4 rounded border-slate-600 bg-slate-900 text-amber-500 focus:ring-amber-500" ${checked} />
+              <span class="text-xs font-mono text-slate-200 truncate">${f.rfilename}</span>
+              ${lfsTag}
+            </div>
+            <span class="text-xs font-mono text-slate-400 shrink-0">${formatBytes(f.size)}</span>
+          </label>
+        `;
+      }).join('');
+      updateSelectedSummary();
+    }
+
+    // Transfer Queue
+    async function startTransfers() {
+      const selectedFiles = state.repo.files.filter(f => state.repo.selected.has(f.rfilename));
+      if (selectedFiles.length === 0) return;
+
+      if (!state.drive.connected) {
+        showToast('Please sign in to Google Drive first (or enable Demo Mode).', 'warn');
+        return;
+      }
+
+      const newItems = selectedFiles.map(f => ({
+        id: 'q_' + Math.random().toString(36).slice(2, 9),
+        repoId: state.repo.id,
+        repoType: state.repo.type,
+        filename: f.rfilename,
+        size: f.size || 0,
+        folderId: state.drive.selectedFolderId,
+        status: 'queued',
+        progress: 0,
+        driveLink: '',
+        error: ''
+      }));
+
+      state.queue.unshift(...newItems);
+      state.isTransferring = true;
+      state.cancelRequested = false;
+      el('cancelQueueBtn').classList.remove('hidden');
+      switchTab('queue');
+      renderQueue();
+      updateSelectedSummary();
+
+      for (const item of newItems) {
+        if (state.cancelRequested) {
+          item.status = 'cancelled';
+          renderQueue();
+          continue;
+        }
+        await processTransferItem(item);
+      }
+
+      state.isTransferring = false;
+      el('cancelQueueBtn').classList.add('hidden');
+      updateSelectedSummary();
+      renderQueue();
+    }
+
+    async function processTransferItem(item) {
+      if (state.demoMode) {
+        item.status = 'fetching';
+        renderQueue();
+        logMsg(`[Demo] Fetching ${item.filename} from ${item.repoId}...`);
+        for (let p = 20; p <= 100; p += 20) {
+          if (state.cancelRequested) { item.status = 'cancelled'; renderQueue(); return; }
+          await new Promise(r => setTimeout(r, 180));
+          item.status = p < 60 ? 'fetching' : 'uploading';
+          item.progress = p;
+          renderQueue();
+        }
+        item.status = 'completed';
+        item.driveLink = 'https://drive.google.com/drive/my-drive';
+        logMsg(`[Demo] Uploaded ${item.filename} to Google Drive`);
+        renderQueue();
+        return;
+      }
+
+      try {
+        item.status = 'fetching';
+        item.progress = 15;
+        renderQueue();
+        const base = item.repoType === 'dataset'
+          ? `https://huggingface.co/datasets/${item.repoId}/resolve/main/${item.filename}`
+          : `https://huggingface.co/${item.repoId}/resolve/main/${item.filename}`;
+        logMsg(`Fetching ${item.filename} from Hugging Face...`);
+        const hfHeaders = state.hf.token ? { Authorization: `Bearer ${state.hf.token}` } : {};
+        const hfRes = await fetch(base, { headers: hfHeaders });
+        if (!hfRes.ok) throw new Error(`HF fetch failed (HTTP ${hfRes.status})`);
+
+        const blob = await hfRes.blob();
+        item.status = 'uploading';
+        item.progress = 55;
+        renderQueue();
+        logMsg(`Initiating Drive upload for ${item.filename} (${formatBytes(blob.size)})...`);
+
+        const metadata = {
+          name: item.filename.split('/').pop(),
+          parents: item.folderId && item.folderId !== 'root' ? [item.folderId] : undefined
+        };
+
+        const initRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${state.drive.accessToken}`,
+            'Content-Type': 'application/json; charset=UTF-8'
+          },
+          body: JSON.stringify(metadata)
+        });
+        if (!initRes.ok) throw new Error(`Drive init failed (HTTP ${initRes.status})`);
+        const uploadUrl = initRes.headers.get('Location');
+        if (!uploadUrl) throw new Error('Missing Drive resumable upload URL');
+
+        const putRes = await fetch(uploadUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': blob.type || 'application/octet-stream' },
+          body: blob
+        });
+        if (!putRes.ok) throw new Error(`Drive upload failed (HTTP ${putRes.status})`);
+        const uploaded = await putRes.json();
+
+        item.status = 'completed';
+        item.progress = 100;
+        item.driveLink = `https://drive.google.com/file/d/${uploaded.id}/view`;
+        logMsg(`Completed: ${item.filename} → Drive ID ${uploaded.id}`);
+      } catch (err) {
+        item.status = 'error';
+        item.error = err.message + ' (Large LFS files may require the Python/Colab script)';
+        logMsg(`Error on ${item.filename}: ${err.message}`);
+      }
+      renderQueue();
+    }
+
+    function renderQueue() {
+      el('queueCountBadge').textContent = String(state.queue.length);
+      const completed = state.queue.filter(q => q.status === 'completed').length;
+      el('queueOverallText').textContent = state.queue.length
+        ? `${completed} of ${state.queue.length} transfers completed`
+        : 'No transfers started yet.';
+
+      if (state.queue.length === 0) {
+        el('queueList').innerHTML = '<div class="p-8 text-center border border-slate-800 rounded-xl bg-slate-950/50 text-xs text-slate-500">Select files in the Repository Explorer and click "Download Selected to Drive" to start.</div>';
+        return;
+      }
+
+      const badgeMap = {
+        queued: 'bg-slate-800 text-slate-300',
+        fetching: 'bg-amber-500/15 text-amber-300',
+        uploading: 'bg-blue-500/15 text-blue-300',
+        completed: 'bg-emerald-500/15 text-emerald-300',
+        error: 'bg-rose-500/15 text-rose-300',
+        cancelled: 'bg-slate-800 text-slate-400'
+      };
+
+      el('queueList').innerHTML = state.queue.map(q => `
+        <div class="border border-slate-800 rounded-xl bg-slate-950/70 p-3.5 space-y-2">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="min-w-0">
+              <p class="text-xs font-mono text-slate-100 truncate">${q.filename}</p>
+              <p class="text-[11px] text-slate-500">${q.repoType}: ${q.repoId} • ${formatBytes(q.size)}</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded-full text-[11px] font-medium ${badgeMap[q.status] || badgeMap.queued}">${q.status.toUpperCase()}</span>
+              ${q.driveLink ? `<a href="${q.driveLink}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-400 hover:underline">Open in Drive ↗</a>` : ''}
+            </div>
+          </div>
+          <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div class="h-full transition-all duration-200 ${q.status === 'error' ? 'bg-rose-500' : q.status === 'completed' ? 'bg-emerald-500' : 'bg-amber-400'}" style="width: ${q.progress}%"></div>
+          </div>
+          ${q.error ? `<p class="text-[11px] text-rose-300">${q.error}</p>` : ''}
+        </div>
+      `).join('');
+    }
+
+    function updatePythonScript() {
+      const selected = Array.from(state.repo.selected);
+      const patterns = selected.length ? JSON.stringify(selected) : 'None  # Downloads entire repo';
+      const folderName = (state.drive.folders.find(f => f.id === state.drive.selectedFolderId)?.name || 'HuggingFace-Downloads').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const script = `# Run in Google Colab or local Python with Google Drive mounted
+# pip install -q huggingface_hub
+
+import os
+from huggingface_hub import login, snapshot_download
+
+# 1. Authenticate with Hugging Face (set HF_TOKEN env var or paste token)
+hf_token = os.environ.get("HF_TOKEN", "")
+if hf_token:
+    login(token=hf_token)
+
+# 2. Mount Google Drive (in Google Colab)
+try:
+    from google.colab import drive
+    drive.mount("/content/drive")
+    drive_base = "/content/drive/MyDrive/${folderName}"
+except ImportError:
+    drive_base = "./drive_downloads/${folderName}"
+
+target_dir = os.path.join(drive_base, "${state.repo.id.replace('/', '__')}")
+os.makedirs(target_dir, exist_ok=True)
+
+# 3. Download ${state.repo.type} directly into Google Drive
+downloaded_path = snapshot_download(
+    repo_id="${state.repo.id}",
+    repo_type="${state.repo.type}",
+    local_dir=target_dir,
+    allow_patterns=${patterns},
+    token=hf_token or None,
+)
+print("Saved to:", downloaded_path)
+`;
+      el('pythonScriptPreview').textContent = script;
+    }
+
+    function copyTextFallback(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (_) {}
+      ta.remove();
+    }
+
+    // Event Listeners
+    el('demoToggleBtn').addEventListener('click', () => {
+      state.demoMode = !state.demoMode;
+      showToast(state.demoMode ? 'Demo Mode enabled' : 'Demo Mode disabled', 'info');
+      updateStatusUI();
+    });
+
+    el('toggleHfTokenBtn').addEventListener('click', () => {
+      const inp = el('hfTokenInput');
+      const isPass = inp.type === 'password';
+      inp.type = isPass ? 'text' : 'password';
+      el('toggleHfTokenBtn').textContent = isPass ? 'Hide' : 'Show';
+    });
+
+    el('hfConnectBtn').addEventListener('click', connectHF);
+    el('hfGuestBtn').addEventListener('click', connectHFGuest);
+    el('hfDisconnectBtn').addEventListener('click', () => {
+      state.hf = { connected: false, guest: false, token: '', username: '', type: '' };
+      updateStatusUI();
+    });
+
+    el('driveConnectBtn').addEventListener('click', connectDrive);
+    el('driveDisconnectBtn').addEventListener('click', () => {
+      state.drive.connected = false;
+      state.drive.accessToken = '';
+      updateStatusUI();
+    });
+    el('driveFolderSelect').addEventListener('change', (e) => {
+      state.drive.selectedFolderId = e.target.value;
+      updatePythonScript();
+    });
+
+    el('newFolderBtn').addEventListener('click', () => el('folderModal').classList.remove('hidden'));
+    el('closeFolderModalBtn').addEventListener('click', () => el('folderModal').classList.add('hidden'));
+    el('cancelFolderModalBtn').addEventListener('click', () => el('folderModal').classList.add('hidden'));
+    el('confirmCreateFolderBtn').addEventListener('click', createDriveFolder);
+
+    el('openGuideBtn').addEventListener('click', () => el('guideModal').classList.remove('hidden'));
+    el('guideLinkBtn').addEventListener('click', () => el('guideModal').classList.remove('hidden'));
+    el('closeGuideModalBtn').addEventListener('click', () => el('guideModal').classList.add('hidden'));
+    el('doneGuideBtn').addEventListener('click', () => el('guideModal').classList.add('hidden'));
+
+    el('tabBrowser').addEventListener('click', () => switchTab('browser'));
+    el('tabQueue').addEventListener('click', () => switchTab('queue'));
+    el('tabScript').addEventListener('click', () => switchTab('script'));
+    el('jumpToScriptBtn').addEventListener('click', () => switchTab('script'));
+
+    el('typeModelBtn').addEventListener('click', () => {
+      state.repo.type = 'model';
+      el('typeModelBtn').className = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 text-slate-950 transition';
+      el('typeDatasetBtn').className = 'px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 transition';
+      updatePythonScript();
+    });
+    el('typeDatasetBtn').addEventListener('click', () => {
+      state.repo.type = 'dataset';
+      el('typeDatasetBtn').className = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 text-slate-950 transition';
+      el('typeModelBtn').className = 'px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-200 transition';
+      updatePythonScript();
+    });
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        el('repoIdInput').value = btn.dataset.repo;
+        if (btn.dataset.type === 'dataset') el('typeDatasetBtn').click();
+        else el('typeModelBtn').click();
+        loadRepoFiles();
+      });
+    });
+
+    el('loadRepoBtn').addEventListener('click', () => loadRepoFiles());
+    el('searchHfBtn').addEventListener('click', searchHFRepos);
+    el('closeSearchResultsBtn').addEventListener('click', () => el('hfSearchResultsWrap').classList.add('hidden'));
+    el('hfSearchResultsList').addEventListener('click', (e) => {
+      const btn = e.target.closest('.search-result-btn');
+      if (!btn) return;
+      const id = btn.dataset.resultId;
+      const type = btn.dataset.resultType;
+      if (type === 'dataset') el('typeDatasetBtn').click();
+      else el('typeModelBtn').click();
+      el('repoIdInput').value = id;
+      el('hfSearchResultsWrap').classList.add('hidden');
+      loadRepoFiles(id);
+    });
+    el('locatorChipsList').addEventListener('click', (e) => {
+      const chip = e.target.closest('.locator-chip');
+      if (!chip) return;
+      const id = chip.dataset.locId;
+      const type = chip.dataset.locType;
+      if (type === 'dataset') el('typeDatasetBtn').click();
+      else if (type === 'model') el('typeModelBtn').click();
+      const allLocs = parseHFLocators(el('repoIdInput').value);
+      renderLocatorChips(allLocs, id);
+      loadRepoFiles(id);
+    });
+    el('fileFilterInput').addEventListener('input', (e) => {
+      state.repo.filter = e.target.value;
+      renderFileList();
+    });
+    el('fileListTableWrap').addEventListener('change', (e) => {
+      if (e.target.classList.contains('file-checkbox')) {
+        const name = e.target.dataset.file;
+        if (e.target.checked) state.repo.selected.add(name);
+        else state.repo.selected.delete(name);
+        updateSelectedSummary();
+        updatePythonScript();
+      }
+    });
+    el('selectAllBtn').addEventListener('click', () => {
+      state.repo.files.forEach(f => state.repo.selected.add(f.rfilename));
+      renderFileList();
+    });
+    el('selectSmallBtn').addEventListener('click', () => {
+      state.repo.selected.clear();
+      state.repo.files.filter(f => (f.size || 0) <= 100 * 1024 * 1024).forEach(f => state.repo.selected.add(f.rfilename));
+      renderFileList();
+    });
+    el('clearSelectionBtn').addEventListener('click', () => {
+      state.repo.selected.clear();
+      renderFileList();
+    });
+
+    el('startDownloadBtn').addEventListener('click', startTransfers);
+    el('cancelQueueBtn').addEventListener('click', () => {
+      state.cancelRequested = true;
+      showToast('Cancelling remaining transfers...', 'warn');
+    });
+    el('clearCompletedBtn').addEventListener('click', () => {
+      state.queue = state.queue.filter(q => q.status !== 'completed' && q.status !== 'cancelled');
+      renderQueue();
+    });
+    el('clearLogBtn').addEventListener('click', () => { el('activityLog').textContent = 'Ready.'; });
+
+    el('copyScriptBtn').addEventListener('click', async () => {
+      const code = el('pythonScriptPreview').textContent;
+      try {
+        await navigator.clipboard.writeText(code);
+      } catch (_) {
+        copyTextFallback(code);
+      }
+      showToast('Python script copied to clipboard', 'success');
+    });
+    el('downloadScriptBtn').addEventListener('click', () => {
+      const blob = new Blob([el('pythonScriptPreview').textContent], { type: 'text/x-python' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'hf_to_gdrive.py';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Init
+    const savedClientId = safeGetStorage('hf_drive_client_id');
+    if (savedClientId) el('googleClientIdInput').value = savedClientId;
+    updateStatusUI();
+  </script>
+</body>
+</html>

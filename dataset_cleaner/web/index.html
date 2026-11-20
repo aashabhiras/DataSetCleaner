@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>DataSetCleaner — Local Workspace</title>
+  <style>
+    :root{font-family:Inter,"Segoe UI",system-ui,sans-serif;color:#18212b;background:#f3f6f8;font-synthesis:none;--ink:#17212b;--muted:#64717c;--line:#dce3e8;--paper:#fff;--teal:#137c77;--teal-soft:#e5f4f2;--amber:#9a5b00;--amber-soft:#fff2d8;--red:#a12d36;--shadow:0 8px 28px #1425300a}
+    *{box-sizing:border-box}body{margin:0}.shell{max-width:1420px;margin:auto;padding:24px 30px 56px}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:22px}.brand{display:flex;gap:13px;align-items:center}.mark{width:42px;height:42px;border-radius:12px;background:#d8efec;color:#126963;display:grid;place-items:center;font-size:22px;font-weight:800}.top h1{font-size:22px;margin:0 0 3px;letter-spacing:-.4px}.top p,.muted{margin:0;color:var(--muted);font-size:13px}.local{border:1px solid #c4e3df;background:#eff9f7;color:#176c66;border-radius:99px;padding:8px 12px;font-size:12px;font-weight:650;white-space:nowrap}.grid{display:grid;grid-template-columns:minmax(300px,365px) minmax(0,1fr);gap:20px;align-items:start}.stack{display:grid;gap:16px}.card{background:var(--paper);border:1px solid var(--line);border-radius:13px;box-shadow:var(--shadow);padding:19px}.card h2{font-size:15px;margin:0 0 4px}.card h3{font-size:14px;margin:0 0 10px}.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.step{font-size:10px;letter-spacing:.08em;color:#75818b;font-weight:700;text-transform:uppercase;margin-bottom:7px}.label{font-size:12px;color:#44515b;font-weight:650;display:block;margin:12px 0 6px}input,textarea,select{font:inherit;color:var(--ink);background:#fff;border:1px solid #cfd9df;border-radius:7px;padding:9px 10px;width:100%;font-size:12px}textarea{min-height:108px;resize:vertical;font-family:ui-monospace,Consolas,monospace;line-height:1.5}input:focus,textarea:focus,select:focus{outline:2px solid #a9d8d4;border-color:#70b8b2}.row{display:flex;gap:9px;align-items:center}.row>*{flex:1}.toggle{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:#43515c;margin:13px 0}.toggle input{width:auto;margin:1px 0 0}.button{font:inherit;font-size:12px;font-weight:650;border-radius:7px;padding:9px 12px;border:1px solid #cfd9df;background:#fff;color:var(--ink);cursor:pointer}.button:hover{background:#f6f8f9}.button.primary{color:#fff;background:var(--teal);border-color:var(--teal)}.button.primary:hover{background:#0c6863}.button:disabled{opacity:.5;cursor:wait}.button.small{padding:6px 9px;font-size:11px}.status{font-size:12px;color:var(--muted);min-height:18px;margin-top:9px}.status.error{color:var(--red)}.notice{margin-top:13px;padding:10px 11px;border-radius:8px;background:#f6f8f9;color:#56636e;font-size:11px;line-height:1.5}.notice.amber{background:var(--amber-soft);color:#79500e}.runs{display:grid;gap:7px}.run{width:100%;text-align:left;background:#f8fafb;border:1px solid var(--line);padding:10px;border-radius:8px;cursor:pointer;font:inherit}.run strong{display:block;font-size:12px}.run span{font-size:11px;color:var(--muted)}.metrics{display:grid;grid-template-columns:repeat(4,minmax(110px,1fr));gap:10px;margin:14px 0}.metric{padding:12px;border:1px solid var(--line);background:#fbfcfc;border-radius:9px}.metric b{font-size:20px;display:block;letter-spacing:-.5px}.metric span{font-size:10px;color:var(--muted)}.warnings{display:grid;gap:7px}.warning{padding:9px 11px;border-radius:7px;background:var(--amber-soft);color:#76500e;font-size:12px}.issue-list{display:flex;flex-wrap:wrap;gap:6px}.pill{border-radius:99px;background:#eef2f4;color:#53616d;padding:5px 8px;font-size:10px}.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);padding-bottom:10px;margin:18px 0 14px}.tab{background:transparent;border:0;padding:7px 11px;color:#64717c;font-weight:650;font-size:12px;border-radius:6px;cursor:pointer}.tab.active{background:var(--teal-soft);color:#176963}.panel[hidden]{display:none}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:11px}.toolbar .row{flex:0 1 auto}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:8px}table{border-collapse:collapse;width:100%;font-size:11px;min-width:560px}th{text-align:left;padding:9px 10px;background:#f6f8f9;color:#56636e;font-size:10px;position:sticky;top:0}td{padding:9px 10px;border-top:1px solid #edf0f2;vertical-align:top;max-width:380px;overflow-wrap:anywhere}.record{white-space:pre-wrap;max-height:140px;overflow:auto;background:#f7f9fa;padding:8px;border-radius:6px;font-family:ui-monospace,Consolas,monospace;font-size:10px}.finding{font-weight:700;color:#4d5d69}.footer{margin-top:18px;font-size:11px;color:#77838d;line-height:1.5}.empty{padding:22px;text-align:center;color:#7a8790;font-size:12px}.rights{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}.right-check{font-size:11px;line-height:1.4}.code{font-family:ui-monospace,Consolas,monospace;font-size:10px;word-break:break-all;color:#53616d}.hidden{display:none!important}
+    @media(max-width:920px){.shell{padding:18px 14px 36px}.grid{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,minmax(110px,1fr))}.top{align-items:flex-start}.local{font-size:10px}}
+  </style>
+</head>
+<body>
+<main class="shell">
+  <header class="top">
+    <div class="brand"><div class="mark">D</div><div><h1>DataSetCleaner</h1><p>Local dataset review workspace for coding agents</p></div></div>
+    <div class="local">● Local API · loopback only</div>
+  </header>
+  <div class="grid">
+    <aside class="stack">
+      <section class="card">
+        <div class="step">Step 01 · Import</div><h2>Analyze local sources</h2><p class="muted">Use absolute paths. Input files are read-only.</p>
+        <label class="label" for="sources">Sources (JSON array)</label>
+        <textarea id="sources" spellcheck="false">[
+  {"path":"C:\\data\\examples.jsonl","license_id":"","description":""}
+]</textarea>
+        <label class="label" for="field-map">Optional field map (JSON object)</label>
+        <textarea id="field-map" spellcheck="false" style="min-height:66px">{}</textarea>
+        <label class="toggle"><input id="near" type="checkbox"><span>Run slower near-duplicate detection</span></label>
+        <label class="toggle"><input id="syntax" type="checkbox" checked><span>Run code syntax checks (can slow large scans)</span></label>
+        <button id="analyze" class="button primary" style="width:100%">Start local analysis</button>
+        <div id="import-status" class="status"></div>
+        <div class="notice">Large runs continue in the local service. Keep this dashboard open to see progress. Record contents are returned only when you open them for review or an agent requests them.</div>
+      </section>
+      <section class="card">
+        <div class="section-head"><div><div class="step">Workspace</div><h2>Recent runs</h2></div><button id="refresh-runs" class="button small">Refresh</button></div>
+        <div id="runs" class="runs"><div class="empty">No runs loaded.</div></div>
+      </section>
+    </aside>
+    <section class="card">
+      <div class="section-head"><div><div class="step">Step 02 · Review</div><h2 id="run-title">Choose a run</h2><p id="run-subtitle" class="muted">Findings and decisions stay in the local review database.</p></div><div id="run-status" class="pill">No run selected</div></div>
+      <div id="run-content" class="hidden">
+        <div id="metrics" class="metrics"></div>
+        <div id="license-warnings" class="warnings"></div>
+        <div id="issue-pills" class="issue-list"></div>
+        <nav class="tabs"><button class="tab active" data-panel="findings-panel">Findings</button><button class="tab" data-panel="records-panel">Records</button><button class="tab" data-panel="candidates-panel">Generated candidates</button><button class="tab" data-panel="export-panel">Export</button></nav>
+        <section id="findings-panel" class="panel">
+          <div class="toolbar"><strong>Quality findings</strong><div class="row"><select id="finding-code"><option value="">All types</option></select><button id="findings-prev" class="button small">Previous</button><button id="findings-next" class="button small">Next</button></div></div>
+          <div id="findings-count" class="muted" style="margin-bottom:8px"></div><div id="findings-table" class="table-wrap"></div>
+        </section>
+        <section id="records-panel" class="panel" hidden>
+          <div class="toolbar"><strong>Record inclusion review</strong><div class="row"><button id="records-prev" class="button small">Previous</button><button id="records-next" class="button small">Next</button></div></div>
+          <div id="records-count" class="muted" style="margin-bottom:8px"></div><div id="records-table" class="table-wrap"></div>
+        </section>
+        <section id="candidates-panel" class="panel" hidden><div class="section-head"><strong>Agent-generated examples</strong><button id="refresh-candidates" class="button small">Refresh</button></div><div class="notice">Agents stage generated examples as separate local JSONL files with a provider/model manifest. Candidates are not merged into a dataset automatically.</div><div id="candidate-list" style="margin-top:12px"></div></section>
+        <section id="export-panel" class="panel" hidden>
+          <h3>Export reviewed data</h3><p class="muted">Preview first. Export creates a new package and never changes source files.</p>
+          <div class="metrics" style="grid-template-columns:repeat(2,minmax(110px,1fr))"><div class="metric"><b id="export-estimate">—</b><span>estimated output records</span></div><button id="preview-export" class="button">Preview export rules</button></div>
+          <div class="row"><div><label class="label" for="output-dir">Output folder</label><input id="output-dir" placeholder="C:\\data\\release"></div><div><label class="label" for="dataset-name">Dataset name</label><input id="dataset-name" value="coding-dataset"></div></div>
+          <label class="label" for="dataset-description">Dataset description</label><textarea id="dataset-description" spellcheck="true" style="min-height:66px" placeholder="Describe the dataset contents, preparation, and intended use."></textarea>
+          <div class="row"><div><label class="label" for="format">Format</label><select id="format"><option value="jsonl">JSONL</option><option value="csv">CSV</option><option value="parquet">Parquet</option></select></div><div><label class="toggle"><input id="exclude-incomplete" type="checkbox"><span>Exclude incomplete rows</span></label><label class="toggle"><input id="exclude-near" type="checkbox"><span>Exclude near duplicates</span></label></div></div>
+          <div class="rights"><label class="toggle right-check"><input id="rights-reviewed" type="checkbox"><span>I reviewed the rights, source licenses, quality findings, and generated candidates.</span></label><label class="toggle right-check"><input id="export-approved" type="checkbox"><span>I explicitly approve exporting this reviewed package.</span></label></div>
+          <button id="export-button" class="button primary">Export reviewed package</button><div id="export-result" class="status"></div>
+        </section>
+      </div>
+      <div id="review-empty" class="empty">Start an analysis or select a recent run to review its local findings.</div>
+      <div id="global-status" class="status"></div>
+    </section>
+  </div>
+  <footer class="footer">The dashboard binds to 127.0.0.1 and serves only local files. Gemini or another hosted model receives data only if you connect it as the agent provider and ask it to inspect record content. Free-tier terms, quotas, and data retention depend on that provider. Use a local model for private data.</footer>
+</main>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  let activeRun = null, findingsOffset = 0, recordsOffset = 0, totalFindings = 0, totalRecords = 0, runPoll = null;
+  const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+  async function request(path, options={}) {
+    const response = await fetch(path, {headers:{"Content-Type":"application/json"},...options});
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
+    return data;
+  }
+  function status(id, message, error=false){$(id).textContent=message;$(id).classList.toggle("error",error)}
+  function showRun(run){
+    activeRun=run.run_id; $("run-content").classList.remove("hidden");$("review-empty").classList.add("hidden");$("run-title").textContent=`Run ${activeRun.slice(0,8)}`;
+    const summary=run.summary||{}; const state=run.status||"completed"; if(state!=="running"&&runPoll){clearInterval(runPoll);runPoll=null} $("run-status").textContent=state+(state==="running"?` · ${Number(run.scanned_records||0).toLocaleString()} rows`:"");
+    $("run-subtitle").textContent=state==="running"?"Analysis is running locally. Findings will appear when it finishes.":`${Number(summary.records||0).toLocaleString()} records · ${Number(summary.elapsed_seconds||0).toLocaleString()} seconds · source files unchanged`;
+    if(state!=="completed"){ $("metrics").innerHTML=`<div class="metric"><b>${Number(run.scanned_records||0).toLocaleString()}</b><span>rows scanned</span></div>`;$("license-warnings").innerHTML="";$("issue-pills").innerHTML="";$("findings-table").innerHTML="<div class='empty'>Analysis still running…</div>"; if(run.status==="failed") status("global-status",run.error||"Analysis failed",true); return; }
+    if(runPoll){clearInterval(runPoll);runPoll=null}
+    $("metrics").innerHTML=`<div class="metric"><b>${Number(summary.records||0).toLocaleString()}</b><span>input records</span></div><div class="metric"><b>${Object.values(summary.issues||{}).reduce((a,b)=>a+Number(b||0),0).toLocaleString()}</b><span>quality findings</span></div><div class="metric"><b>${(summary.fields||[]).length}</b><span>schema fields</span></div><div class="metric"><b>${Number(summary.elapsed_seconds||0).toLocaleString()}s</b><span>analysis time</span></div>`;
+    $("license-warnings").innerHTML=(summary.license_warnings||[]).map(x=>`<div class="warning">${esc(x)}</div>`).join("");
+    const issueEntries=Object.entries(summary.issues||{});$("issue-pills").innerHTML=issueEntries.length?issueEntries.map(([k,v])=>`<span class="pill">${esc(k)} · ${Number(v).toLocaleString()}</span>`).join(""):`<span class="pill">No findings</span>`;
+    const select=$("finding-code"), current=select.value;select.innerHTML='<option value="">All types</option>'+issueEntries.map(([k,v])=>`<option value="${esc(k)}">${esc(k)} (${Number(v).toLocaleString()})</option>`).join("");select.value=current;
+    loadFindings(); loadCandidates();
+  }
+  async function loadRuns(){try{const data=await request("/api/runs");$("runs").innerHTML=data.runs.length?data.runs.map(r=>`<button class="run" data-id="${esc(r.run_id)}"><strong>${esc(r.status||"unknown")} · ${esc(r.run_id.slice(0,8))}</strong><span>${Number(r.summary?.records||r.scanned_records||0).toLocaleString()} records · ${esc((r.summary?.sources||[]).map(s=>s.path.split(/[\\/]/).pop()).join(", ")||"")}</span></button>`).join(""):'<div class="empty">No previous runs.</div>';document.querySelectorAll(".run").forEach(b=>b.onclick=()=>selectRun(b.dataset.id));}catch(e){status("import-status",e.message,true)}}
+  async function selectRun(id){if(runPoll){clearInterval(runPoll);runPoll=null}try{const data=await request(`/api/runs/${encodeURIComponent(id)}`);showRun(data);if(data.status==="running")runPoll=setInterval(async()=>{try{showRun(await request(`/api/runs/${encodeURIComponent(id)}`))}catch(e){status("global-status",e.message,true)}},2500);loadRuns();}catch(e){status("global-status",e.message,true)}}
+  async function loadFindings(){if(!activeRun)return;try{const data=await request(`/api/runs/${activeRun}/findings?offset=${findingsOffset}&limit=50&code=${encodeURIComponent($("finding-code").value)}`);totalFindings=data.total;$("findings-count").textContent=`${Number(data.total).toLocaleString()} findings · rows ${data.total?findingsOffset+1:0}–${Math.min(findingsOffset+data.findings.length,data.total)}`;$("findings-table").innerHTML=data.findings.length?`<table><thead><tr><th>Type</th><th>Record</th><th>Source</th><th>Finding</th></tr></thead><tbody>${data.findings.map(f=>`<tr><td class="finding">${esc(f.code)}</td><td>${esc(f.row_id??"—")}<br><span class="muted">line ${esc(f.source_row??"—")}</span></td><td>${esc(f.source_path||"")}</td><td>${esc(f.detail)}</td></tr>`).join("")}</tbody></table>`:'<div class="empty">No findings on this page.</div>';}catch(e){status("global-status",e.message,true)}}
+  async function loadRecords(){if(!activeRun)return;try{const data=await request(`/api/runs/${activeRun}/records?offset=${recordsOffset}&limit=20`);totalRecords=data.total;$("records-count").textContent=`${Number(data.total).toLocaleString()} records · rows ${data.total?recordsOffset+1:0}–${Math.min(recordsOffset+data.records.length,data.total)}`;$("records-table").innerHTML=data.records.length?`<table><thead><tr><th>Record</th><th>Source</th><th>Content preview</th><th>Review</th></tr></thead><tbody>${data.records.map(r=>`<tr><td>#${esc(r.id)}<br><span class="muted">${r.include_row?"included":"excluded"}</span><br>${esc(r.issue_codes||"")}</td><td>${esc(r.input_path||"")}<br><span class="muted">line ${esc(r.source_row)}</span></td><td><details><summary>View record</summary><pre class="record">${esc(JSON.stringify(r.data,null,2).slice(0,5000))}${JSON.stringify(r.data).length>5000?"… (preview truncated)":""}</pre></details></td><td><button class="button small inclusion" data-id="${esc(r.id)}" data-include="${r.include_row?"false":"true"}">${r.include_row?"Exclude":"Include"}</button></td></tr>`).join("")}</tbody></table>`:'<div class="empty">No records on this page.</div>';document.querySelectorAll(".inclusion").forEach(b=>b.onclick=async()=>{try{await request(`/api/runs/${activeRun}/records/${b.dataset.id}/include`,{method:"POST",body:JSON.stringify({include:b.dataset.include==="true"})});loadRecords()}catch(e){status("global-status",e.message,true)}});}catch(e){status("global-status",e.message,true)}}
+  async function loadCandidates(){if(!activeRun)return;try{const data=await request(`/api/runs/${activeRun}/candidates`);$("candidate-list").innerHTML=data.candidates.length?data.candidates.map(c=>`<div class="notice"><b>${Number(c.records)} proposed examples</b> · ${esc(c.provider)} / ${esc(c.model)} · status: ${esc(c.status)}<div class="code">${esc(c.data_file)}</div><div class="code">${esc(c.manifest_file)}</div></div>`).join(""):'<div class="empty">No generated candidates staged by an agent.</div>';}catch(e){status("global-status",e.message,true)}}
+  async function previewExport(){if(!activeRun)return;try{const data=await request(`/api/runs/${activeRun}/preview-export`,{method:"POST",body:JSON.stringify({exclude_near:$("exclude-near").checked,exclude_incomplete:$("exclude-incomplete").checked,exclude_malformed:true})});$("export-estimate").textContent=Number(data.estimated_export_records).toLocaleString();$("export-result").textContent=`${Number(data.excluded_by_cleanup_rules).toLocaleString()} excluded by cleanup rules. Review license warnings above.`;}catch(e){status("export-result",e.message,true)}}
+  $("analyze").onclick=async()=>{const button=$("analyze");button.disabled=true;status("import-status","Starting local analysis…");try{const sources=JSON.parse($("sources").value);const field_map=JSON.parse($("field-map").value);const run=await request("/api/runs",{method:"POST",body:JSON.stringify({sources,field_map,detect_near:$("near").checked,check_syntax:$("syntax").checked})});status("import-status",`Analysis started · ${run.run_id}`);await loadRuns();await selectRun(run.run_id);}catch(e){status("import-status",e.message,true)}finally{button.disabled=false}};
+  $("refresh-runs").onclick=loadRuns;$("finding-code").onchange=()=>{findingsOffset=0;loadFindings()};$("findings-prev").onclick=()=>{findingsOffset=Math.max(0,findingsOffset-50);loadFindings()};$("findings-next").onclick=()=>{if(findingsOffset+50<totalFindings){findingsOffset+=50;loadFindings()}};$("records-prev").onclick=()=>{recordsOffset=Math.max(0,recordsOffset-20);loadRecords()};$("records-next").onclick=()=>{if(recordsOffset+20<totalRecords){recordsOffset+=20;loadRecords()}};$("refresh-candidates").onclick=loadCandidates;$("preview-export").onclick=previewExport;
+  document.querySelectorAll(".tab").forEach(button=>button.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===button));document.querySelectorAll(".panel").forEach(panel=>panel.hidden=panel.id!==button.dataset.panel);if(button.dataset.panel==="records-panel")loadRecords()});
+  $("export-button").onclick=async()=>{if(!$("rights-reviewed").checked||!$("export-approved").checked){status("export-result","Tick both rights-review and export-approval boxes first.",true);return}if(!confirm("Export this reviewed package? Data sources will remain untouched."))return;try{const result=await request(`/api/runs/${activeRun}/export`,{method:"POST",body:JSON.stringify({output_dir:$("output-dir").value,dataset_name:$("dataset-name").value,description:$("dataset-description").value,output_format:$("format").value,exclude_near:$("exclude-near").checked,exclude_incomplete:$("exclude-incomplete").checked,exclude_malformed:true,user_approved:true})});status("export-result",`Exported ${Number(result.exported_records).toLocaleString()} records: ${result.data_file}`)}catch(e){status("export-result",e.message,true)}};
+  request("/api/health").then(()=>loadRuns()).catch(e=>status("import-status",`Local API unavailable: ${e.message}`,true));
+})();
+</script>
+</body>
+</html>

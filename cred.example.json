@@ -1,0 +1,50 @@
+{
+  "groq": {
+    "api_keys": [
+      {
+        "id": "key_1",
+        "key": "gsk_your_groq_api_key_1_here",
+        "label": "Groq Key 1"
+      },
+      {
+        "id": "key_2",
+        "key": "gsk_your_groq_api_key_2_here",
+        "label": "Groq Key 2"
+      }
+    ],
+    "endpoint": "https://api.groq.com/openai/v1/chat/completions",
+    "primary_model": "qwen/qwen3.8-27b",
+    "fallback_model": "openai/gpt-oss-120b"
+  },
+  "cloudflare": {
+    "accounts": [
+      {
+        "id": "cf_account_1",
+        "label": "CF Account 1",
+        "account_id": "your_cloudflare_account_id_here",
+        "api_token": "cfut_your_cloudflare_api_token_here"
+      }
+    ],
+    "models": {
+      "coding_32b": "@cf/qwen/qwen2.5-coder-32b-instruct",
+      "fast_chat_3b": "@cf/meta/llama-3.2-3b-instruct",
+      "reasoning_32b": "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b",
+      "general_24b": "@cf/mistralai/mistral-small-3.1-24b-instruct"
+    }
+  },
+  "google_drive": {
+    "client_id": "your_gdrive_client_id.apps.googleusercontent.com",
+    "client_secret": "GOCSPX-your_gdrive_client_secret_here",
+    "refresh_token": "1//your_oauth_refresh_token_here",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "scopes": [
+      "https://www.googleapis.com/auth/drive"
+    ],
+    "streaming_folder_id": "your_google_drive_folder_id_here"
+  },
+  "kaggle": {
+    "username": "your_kaggle_username_here",
+    "token": "your_kaggle_api_token_here",
+    "auth_method": "API_KEY"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "dataset": "the-stack-python-shard0-curated-complete.jsonl",
+  "language": "python",
+  "total_examples": 12988,
+  "explanation_presence_pct": 100.0,
+  "parse_rate_pct": 99.94,
+  "compile_rate_pct": 99.87,
+  "instruction_to_code_alignment_pct": 94.72,
+  "oracle_pass_rate_pct": 100.0,
+  "uniqueness_rate_pct": 100.0,
+  "exact_duplicates": 0,
+  "license_compliance_rate_pct": 100.0,
+  "permissive_commercial_license_pct": 98.2,
+  "security_safety_rate_pct": 99.21,
+  "security_flagged_examples": 103,
+  "human_review_rate_pct": 0.85,
+  "avg_prompt_tokens": 49.6,
+  "avg_completion_tokens": 133.7,
+  "max_prompt_tokens": 266,
+  "max_completion_tokens": 983,
+  "license_breakdown": {
+    "MIT": 7556,
+    "Apache-2.0": 3319,
+    "BSD-3-Clause": 1252,
+    "BSD-2-Clause": 310,
+    "Unlicense": 206,
+    "CC0-1.0": 108,
+    "Other Permissive": 237
+  }
+}

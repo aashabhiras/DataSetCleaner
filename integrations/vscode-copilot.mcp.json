@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "datasetcleaner": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["-m", "dataset_cleaner.mcp_server"],
+      "tools": ["*"]
+    }
+  }
+}

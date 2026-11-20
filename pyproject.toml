@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "datasetcleaner"
+version = "0.1.0"
+description = "Local-first coding dataset curation for AI training data"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+parquet = ["pyarrow>=17"]
+tokens = ["tiktoken>=0.7"]
+agents = ["mcp>=2,<3"]
+kaggle = ["kaggle>=1.7", "six>=1.16"]
+google-drive = ["google-api-python-client>=2.160", "google-auth>=2.38"]
+
+[project.scripts]
+datasetcleaner = "dataset_cleaner.cli:main"
+datasetcleaner-gui = "dataset_cleaner.gui:main"
+datasetcleaner-tokens = "dataset_cleaner.token_count:main"
+datasetcleaner-mcp = "dataset_cleaner.mcp_server:main"
+datasetcleaner-api = "dataset_cleaner.api:main"
+datasetcleaner-kaggle = "dataset_cleaner.kaggle:main"
+datasetcleaner-drive-upload = "dataset_cleaner.drive_upload:main"
+datasetcleaner-reporter = "dataset_cleaner.reporter:main"
+
+[tool.setuptools.packages.find]
+include = ["dataset_cleaner*"]
+
+[tool.setuptools.package-data]
+dataset_cleaner = ["web/*.html"]

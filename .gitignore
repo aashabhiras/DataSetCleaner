@@ -1,0 +1,76 @@
+__pycache__/
+*.py[cod]
+.venv/
+build/
+*.egg-info/
+datasetcleaner-output/
+datasetcleaner-kaggle-output/
+.datasetcleaner-work/
+.test-tmp/
+.benchmark-output/
+.tmp/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# Credentials and Secrets
+cred.json
+cred*.json
+!cred.example.json
+token.json
+*token*.json
+*serviceaccount*.json
+fabled-variety-*.json
+*-credentials*.json
+drive_credentials*.json
+*client_secret*.json
+credentials.json
+hf_token*.txt
+hf_token
+kaggle.json
+access_token
+.env
+.env.*
+
+# Local Scratch, Logs & Working Data
+scratch/
+kaggle_outputs/
+processed_releases/
+releases/
+tpu_workspace/
+TPU-jax/
+*.log
+*.parquet
+*.jsonl
+*.jsonl.gz
+*.gz
+
+# Agent State, Memory & Internal Chat Logs
+AGENT_STATE*.md
+AGENT_HANDOFF.md
+CHAT_EXPORT.md
+*_plan.md
+
+# Social Launch & Distribution Drafts (Local Only)
+1/
+2/
+3/
+4/
+
+# Local Output & Run Dirs
+output/
+outputs/
+kaggle-runs/
+kaggle-input/
+prepared/
+review/
+dist/
+*.egg/
+*.dist-info/
+
+# Testing, Coverage & IDEs
+.pytest_cache/
+.coverage
+htmlcov/
+.idea/
+.vscode/
