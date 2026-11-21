@@ -1,0 +1,21 @@
+{
+  "version": 19,
+  "state": "completed",
+  "pass_num": 2,
+  "current_position": 12987,
+  "record_mark": "12988/12988",
+  "total_verified": 5105,
+  "session_verified": 382,
+  "session_tested": 1223,
+  "session_yield_pct": 31.2,
+  "session_rescued": 145,
+  "preflight_filtered": 1239,
+  "tier_1_rejects": 43,
+  "tier_2_rejects": 394,
+  "tier_3_rejects": 1643,
+  "total_rejects": 2080,
+  "pool_summary": "oss120b:705req/721.7kTok(15/15ok) | oss20b:703req/721.7kTok(15/15ok) | qwen27b:691req/671.9kTok(15/15ok)",
+  "slots_ready": 45,
+  "slots_tpd_cooldown": 0,
+  "updated_at": "2026-11-21T05:22:59.527424+00:00"
+}

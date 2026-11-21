@@ -1,0 +1,107 @@
+{
+  "total_verified": 5105,
+  "models": {
+    "unknown": 1371,
+    "oss20b": 1019,
+    "qwen27b": 1303,
+    "oss120b": 1412
+  },
+  "avg_asserts": 5.785308521057787,
+  "max_asserts": 34,
+  "min_asserts": 0,
+  "rescued_count": 1332,
+  "total_rejections": 2080,
+  "tier_counts": {
+    "1": 43,
+    "3": 1643,
+    "2": 394
+  },
+  "category_counts": {
+    "no_assertions_in_tests": 37,
+    "preflight_import_error": 1239,
+    "runtime_type_error": 40,
+    "test_syntax_error": 292,
+    "requires_pytest_fixture": 6,
+    "runtime_attribute_error": 42,
+    "runtime_name_error": 160,
+    "runtime_assertion_error": 152,
+    "runtime_import_error": 34,
+    "other_runtime_error": 61,
+    "timeout": 17
+  },
+  "samples": {
+    "no_assertions_in_tests": {
+      "tier": 1,
+      "reason": "Failed strict sandbox execution (no_assertions_in_tests): No assert statements found in generated tests",
+      "stderr": "No assert statements found in generated tests",
+      "slot": "Key 1/oss120b"
+    },
+    "preflight_import_error": {
+      "tier": 3,
+      "reason": "Failed zero-cost preflight import check: import_timeout",
+      "stderr": "import_timeout",
+      "slot": "none_preflight_skipped"
+    },
+    "runtime_type_error": {
+      "tier": 2,
+      "reason": "Failed strict sandbox execution (runtime_type_error): TypeError: 'coroutine' object does not support the asynchronous context manager protocol",
+      "stderr": "._loop.run_until_complete(task)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/usr/lib/python3.13/asyncio/base_events.py\", line 726, in run_until_complete\n    return future.result()\n           ~~~~~~~~~~~~~^^\n  File \"/tmp/tmp96sty86k/test_runner.py\", line 5, in read_ws\n    async with websoc",
+      "slot": "Key 6/oss120b"
+    },
+    "test_syntax_error": {
+      "tier": 3,
+      "reason": "Failed strict sandbox execution (test_syntax_error): SyntaxError in tests: '[' was never closed (<unknown>, line 55)",
+      "stderr": "SyntaxError in tests: '[' was never closed (<unknown>, line 55)",
+      "slot": "Key 13/oss120b"
+    },
+    "requires_pytest_fixture": {
+      "tier": 1,
+      "reason": "Failed strict sandbox execution (requires_pytest_fixture): FIXTURE_REQUIRED_ERROR: test_ping_post_returns_404",
+      "stderr": "FIXTURE_REQUIRED_ERROR: test_ping_post_returns_404",
+      "slot": "Key 15/oss120b"
+    },
+    "runtime_attribute_error": {
+      "tier": 2,
+      "reason": "Failed strict sandbox execution (runtime_attribute_error): AttributeError: <module '__main__' from '/tmp/tmpk8ufv2fv/test_runner.py'> does not have the attribute 'Mp3ToWav'",
+      "stderr": "p3ToWav') as MockConverter:\n         ~~~~~^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.13/unittest/mock.py\", line 1503, in __enter__\n    original, local = self.get_original()\n                      ~~~~~~~~~~~~~~~~~^^\n  File \"/usr/lib/python3.13/unittest/mock.py\", line 1473, in get_original\n    rai",
+      "slot": "Key 6/oss20b"
+    },
+    "runtime_name_error": {
+      "tier": 2,
+      "reason": "Failed strict sandbox execution (runtime_name_error): NameError: name 'app' is not defined",
+      "stderr": "Traceback (most recent call last):\n  File \"/tmp/tmprox7a74d/test_runner.py\", line 19, in <module>\n    app,\n    ^^^\nNameError: name 'app' is not defined",
+      "slot": "Key 10/oss20b"
+    },
+    "runtime_assertion_error": {
+      "tier": 2,
+      "reason": "Failed strict sandbox execution (runtime_assertion_error): AssertionError",
+      "stderr": "Traceback (most recent call last):\n  File \"/tmp/tmpijx8wju6/test_runner.py\", line 49, in <module>\n    assert get_aqi_level(750, 'cn') == '\u4e25\u91cd\u6c61\u67d3'  # last level for CN\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError",
+      "slot": "Key 12/oss20b"
+    },
+    "runtime_import_error": {
+      "tier": 3,
+      "reason": "Failed strict sandbox execution (runtime_import_error): ModuleNotFoundError: No module named 'cfnlint'",
+      "stderr": "Traceback (most recent call last):\n  File \"/tmp/tmpn1se5xla/test_runner.py\", line 6, in <module>\n    from cfnlint import model\nModuleNotFoundError: No module named 'cfnlint'",
+      "slot": "Key 4/qwen27b"
+    },
+    "other_runtime_error": {
+      "tier": 3,
+      "reason": "Failed strict sandbox execution (other_runtime_error): FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmpqgc2yx6yprivate_static/csv/test_data.csv'",
+      "stderr": "ent call last):\n  File \"/tmp/tmpxhs4sfz4/test_runner.py\", line 25, in <module>\n    result = read_csv(tmpdir, 'test_data', keys)\n  File \"/tmp/tmpxhs4sfz4/test_runner.py\", line 2, in read_csv\n    with open('{root}private_static/csv/{file_name}.csv'.format(root=root, file_name=file_name)) as file:",
+      "slot": "Key 14/qwen27b"
+    },
+    "timeout": {
+      "tier": 3,
+      "reason": "Failed strict sandbox execution (timeout): TimeoutExpired (>5s)",
+      "stderr": "TimeoutExpired (>5s)",
+      "slot": "Key 10/qwen27b"
+    }
+  },
+  "sample_accept_reasons": [
+    "Execution-verified in isolated Python CPU sandbox with 5 assertions executed after 1-step reflection fixing 'no_assertions_in_tests'",
+    "Execution-verified in isolated Python CPU sandbox with 5 assertions executed after 1-step reflection fixing 'no_assertions_in_tests'",
+    "Execution-verified in isolated Python CPU sandbox with 3 assertions executed after 1-step reflection fixing 'no_assertions_in_tests'",
+    "Execution-verified in isolated Python CPU sandbox with 6 assertions executed after 1-step reflection fixing 'requires_pytest_fixture'",
+    "Execution-verified in isolated Python CPU sandbox with 2 assertions executed after 1-step reflection fixing 'no_assertions_in_tests'"
+  ]
+}
